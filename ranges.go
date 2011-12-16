@@ -2,8 +2,8 @@ package ranges
 
 import (
 	"fmt"
-	"strings"
 	"strconv"
+	"strings"
 )
 
 func Parse(r string) ([]int, error) {
