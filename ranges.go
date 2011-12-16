@@ -19,11 +19,11 @@ func Parse(r string) ([]int, error) {
 			}
 			expanded = append(expanded, v)
 		case 2:
-			lo, err := strconv.Atoi(item)
+			lo, err := strconv.Atoi(lohi[0])
 			if err != nil {
 				return nil, err
 			}
-			hi, err := strconv.Atoi(item)
+			hi, err := strconv.Atoi(lohi[1])
 			if err != nil {
 				return nil, err
 			}
