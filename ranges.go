@@ -37,22 +37,69 @@ type IntRange struct {
 	Lo, Hi int
 }
 
-// IntRanges is a slice of multiple integer ranges, allowing the
-// expression of non-contiguous ranges (for example "1,3-4").
-type IntRanges []IntRange
-
 // Contains returns true if ir contains value.
-func (ir IntRange) Contains(value int) bool {
+func (ir *IntRange) Contains(value int) bool {
 	return value >= ir.Lo && value <= ir.Hi
 }
 
-// Expand returns a slice of integers that contains all the numbers in ir.
-func (ir IntRange) Expand() []int {
+// Expand returns a sorted slice of integers that contains all the numbers
+// in ir.
+func (ir *IntRange) Expand() []int {
 	e := make([]int, 0, ir.Hi-ir.Lo+1)
 	for i := ir.Lo; i <= ir.Hi; i++ {
 		e = append(e, i)
 	}
 	return e
+}
+
+// Clean exchanges the upper and lower bound if the upper bound is
+// smaller than the lower one.
+func (ir *IntRange) Clean() {
+	if ir.Hi < ir.Lo {
+		ir.Hi, ir.Lo = ir.Lo, ir.Hi
+	}
+}
+
+// IntRanges is a slice of multiple integer ranges, allowing the
+// expression of non-contiguous ranges (for example "1,3-4").
+type IntRanges []IntRange
+
+// Contains returns true if ir contains value.
+func (ir *IntRanges) Contains(value int) bool {
+	for _, r := range *ir {
+		if r.Contains(value) {
+			return true
+		}
+	}
+	return false
+}
+
+// Expand returns a slice of integers that contains all the numbers in ir.
+// If ir has been cleaned by calling Clean, the slice will be sorted.
+func (ir *IntRanges) Expand() []int {
+	// This guess for the length is as good as any other.
+	e := make([]int, 0, 2*len(*ir))
+
+	for _, r := range *ir {
+		e = append(e, r.Expand()...)
+	}
+	return e
+}
+
+// Len returns the number of distinct ranges in ir.
+func (ir *IntRanges) Len() int {
+	return len(*ir)
+}
+
+// Less returns true if the lower bound of the i-th element is smaller
+// than the one of the j-th element.
+func (ir *IntRanges) Less(i, j int) bool {
+	return (*ir)[i].Lo < (*ir)[j].Lo
+}
+
+// Swap swaps the i-th and the j-th element.
+func (ir *IntRanges) Swap(i, j int) {
+	(*ir)[i], (*ir)[j] = (*ir)[j], (*ir)[i]
 }
 
 func Parse(r string) ([]int, error) {
