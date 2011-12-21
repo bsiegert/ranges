@@ -9,3 +9,6 @@ GOFILES=\
 	ranges.go\
 
 include $(GOROOT)/src/Make.pkg
+
+README: $(GOFILES)
+	godoc . > README
